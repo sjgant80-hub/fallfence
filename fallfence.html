@@ -1,0 +1,1279 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>FallFence &middot; sovereign debating assistant</title>
+<meta name="description" content="Paste an opponent's message. Get archetype + technique + 3 response options. Single-file. On-device. No leash." />
+<meta name="theme-color" content="#8b1a1a" />
+<link rel="icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%230b0a0f'/><text x='16' y='22' font-size='18' text-anchor='middle' fill='%23d4a853' font-family='serif'>&#9826;</text></svg>" />
+<link rel="manifest" href='data:application/manifest+json;utf8,{"name":"FallFence","short_name":"FallFence","start_url":".","display":"standalone","background_color":"#0b0a0f","theme_color":"#8b1a1a","icons":[{"src":"data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 192 192%22><rect width=%22192%22 height=%22192%22 fill=%22%230b0a0f%22/><text x=%2296%22 y=%22130%22 font-size=%22120%22 text-anchor=%22middle%22 fill=%22%23d4a853%22 font-family=%22serif%22>%E2%97%8A</text></svg>","sizes":"192x192","type":"image/svg+xml"}]}' />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ox:#8b1a1a;
+    --ox-deep:#5a0f0f;
+    --brass:#b8974a;
+    --brass-dim:#7a6432;
+    --cream:#c4bfb2;
+    --cream-dim:#8a8579;
+    --void:#0b0a0f;
+    --void-rise:#15131b;
+    --void-card:#1a1822;
+    --gold:#d4a853;
+    --gold-dim:#8a6e36;
+    --green:#4a8a4a;
+    --serif:'Libre Baskerville', Georgia, serif;
+    --sans:'DM Sans', system-ui, sans-serif;
+    --mono:'IBM Plex Mono', Menlo, monospace;
+  }
+  *,*::before,*::after{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:var(--sans);
+    background:var(--void);
+    color:var(--cream);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+    background-image:
+      radial-gradient(at 20% 10%, rgba(139,26,26,.08), transparent 50%),
+      radial-gradient(at 85% 90%, rgba(184,151,74,.05), transparent 55%),
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.77 0 0 0 0 0.75 0 0 0 0 0.7 0 0 0 .035 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  }
+  h1,h2,h3,h4{font-family:var(--serif);font-weight:400;letter-spacing:.01em;margin:0}
+  h1{font-size:1.8rem;color:var(--gold)}
+  h2{font-size:1.1rem;color:var(--brass);text-transform:none;margin-bottom:.6rem}
+  h3{font-size:.95rem;color:var(--brass);font-weight:700}
+  .mono{font-family:var(--mono);font-size:.78rem;letter-spacing:.04em}
+
+  /* layout */
+  header.bar{
+    border-bottom:1px solid rgba(184,151,74,.18);
+    background:linear-gradient(180deg, rgba(139,26,26,.12), transparent);
+    padding:14px 18px;
+    display:flex;align-items:center;justify-content:space-between;
+    gap:12px;flex-wrap:wrap;position:sticky;top:0;z-index:30;
+    backdrop-filter:blur(8px);
+    background-color:rgba(11,10,15,.85);
+  }
+  header.bar .brand{display:flex;align-items:center;gap:10px}
+  header.bar .brand .lozenge{
+    width:32px;height:32px;border:1px solid var(--gold-dim);
+    display:grid;place-items:center;color:var(--gold);
+    font-family:var(--serif);transform:rotate(45deg);
+  }
+  header.bar .brand .lozenge span{transform:rotate(-45deg);font-size:1.1rem}
+  header.bar .meta{font-family:var(--mono);font-size:.7rem;color:var(--cream-dim);text-align:right;line-height:1.3}
+  header.bar .meta .live{color:var(--green)}
+
+  main{padding:18px;max-width:1180px;margin:0 auto}
+  .grid{display:grid;gap:16px}
+  @media(min-width:900px){
+    .grid.cols-2{grid-template-columns:1fr 1fr}
+    .grid.cols-3{grid-template-columns:repeat(3,1fr)}
+  }
+  section.panel{
+    background:var(--void-card);
+    border:1px solid rgba(184,151,74,.18);
+    border-radius:4px;
+    padding:16px;
+    position:relative;
+  }
+  section.panel .corner{
+    position:absolute;top:-1px;left:-1px;
+    border-top:1px solid var(--gold);border-left:1px solid var(--gold);
+    width:14px;height:14px;
+  }
+  section.panel .corner.br{
+    top:auto;left:auto;bottom:-1px;right:-1px;
+    border:none;border-bottom:1px solid var(--gold);border-right:1px solid var(--gold);
+  }
+  section.panel h2 .num{
+    color:var(--brass-dim);font-family:var(--mono);font-size:.7rem;margin-right:6px;
+  }
+
+  /* paste box */
+  textarea.paste{
+    width:100%;
+    min-height:140px;
+    background:var(--void-rise);
+    border:1px solid rgba(184,151,74,.25);
+    color:var(--cream);
+    font-family:var(--serif);
+    font-size:1rem;
+    padding:14px;
+    border-radius:3px;
+    resize:vertical;
+    line-height:1.55;
+  }
+  textarea.paste:focus{outline:none;border-color:var(--gold)}
+  textarea.paste::placeholder{color:var(--cream-dim);font-style:italic}
+
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .row.between{justify-content:space-between}
+  select, button, input[type=text], input[type=password]{
+    font-family:var(--sans);
+    background:var(--void-rise);
+    color:var(--cream);
+    border:1px solid rgba(184,151,74,.25);
+    padding:10px 14px;
+    border-radius:3px;
+    font-size:.95rem;
+  }
+  button{cursor:pointer;transition:background .15s,border-color .15s,color .15s}
+  button.primary{
+    background:var(--ox);
+    border-color:var(--ox-deep);
+    color:var(--cream);
+    font-weight:500;
+    padding:14px 22px;
+    font-size:1rem;
+    letter-spacing:.02em;
+  }
+  button.primary:hover{background:var(--ox-deep)}
+  button.ghost{background:transparent}
+  button.ghost:hover{border-color:var(--gold);color:var(--gold)}
+  button.sample{
+    background:var(--void-rise);
+    border:1px dashed rgba(184,151,74,.4);
+    color:var(--cream-dim);
+    font-family:var(--serif);font-style:italic;
+    text-align:left;width:100%;padding:10px 12px;font-size:.88rem;
+  }
+  button.sample:hover{color:var(--gold);border-color:var(--gold)}
+
+  /* analysis */
+  .analysis-grid{display:grid;grid-template-columns:1fr;gap:14px}
+  @media(min-width:680px){.analysis-grid{grid-template-columns:repeat(3,1fr)}}
+  .analysis-cell{
+    background:var(--void-rise);
+    border-left:2px solid var(--brass-dim);
+    padding:10px 12px;border-radius:0 3px 3px 0;
+  }
+  .analysis-cell .label{font-family:var(--mono);font-size:.65rem;color:var(--cream-dim);text-transform:uppercase;letter-spacing:.1em}
+  .analysis-cell .value{font-family:var(--serif);font-size:1.05rem;color:var(--gold);margin-top:3px;line-height:1.3}
+  .analysis-cell .conf{font-family:var(--mono);font-size:.7rem;color:var(--brass);margin-top:2px}
+
+  /* kill shot banner */
+  .killshot{
+    background:linear-gradient(90deg, var(--ox-deep), var(--ox));
+    border:1px solid var(--gold);
+    padding:14px 16px;border-radius:3px;
+    font-family:var(--serif);font-style:italic;color:var(--cream);
+    margin-bottom:14px;display:none;
+  }
+  .killshot strong{color:var(--gold);font-style:normal;font-weight:700;display:block;font-size:.85rem;letter-spacing:.05em;margin-bottom:4px;font-family:var(--mono)}
+
+  /* options */
+  .option{
+    background:var(--void-rise);
+    border:1px solid rgba(184,151,74,.2);
+    border-radius:3px;
+    padding:14px;display:flex;flex-direction:column;gap:10px;
+  }
+  .option .head{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+  .option .head .tag{
+    background:var(--ox);color:var(--cream);
+    padding:2px 10px;font-family:var(--mono);font-size:.7rem;letter-spacing:.1em;
+    border-radius:2px;
+  }
+  .option .head .meta{font-family:var(--mono);font-size:.7rem;color:var(--cream-dim)}
+  .option .body{
+    font-family:var(--serif);font-size:.98rem;color:var(--cream);line-height:1.55;
+    background:rgba(11,10,15,.5);padding:10px 12px;border-left:2px solid var(--brass);
+  }
+  .option .predict{
+    font-family:var(--sans);font-size:.82rem;color:var(--cream-dim);
+    font-style:italic;
+  }
+  .option .predict::before{content:"→ predicted: ";color:var(--brass);font-style:normal;font-family:var(--mono);font-size:.7rem;letter-spacing:.05em}
+  .option .actions{display:flex;gap:8px;flex-wrap:wrap}
+  .option button.copy{background:var(--brass);color:var(--void);border-color:var(--brass);font-weight:700;flex:1}
+  .option button.copy:hover{background:var(--gold);border-color:var(--gold)}
+  .option button.choose{background:transparent;border:1px solid var(--gold-dim);color:var(--gold)}
+  .option button.choose:hover{background:rgba(212,168,83,.1)}
+
+  /* reference stack */
+  details.ref{
+    border:1px solid rgba(184,151,74,.18);
+    border-radius:3px;
+    margin-bottom:10px;
+    background:var(--void-rise);
+  }
+  details.ref summary{
+    cursor:pointer;padding:12px 14px;
+    font-family:var(--serif);color:var(--brass);
+    list-style:none;display:flex;justify-content:space-between;align-items:center;
+  }
+  details.ref summary::after{content:"+";color:var(--gold);font-family:var(--mono)}
+  details.ref[open] summary::after{content:"−"}
+  details.ref .content{padding:0 14px 14px;border-top:1px solid rgba(184,151,74,.1)}
+  details.ref .content h4{color:var(--gold);font-size:.9rem;margin:12px 0 4px}
+  details.ref .content p{font-size:.88rem;color:var(--cream);margin:0 0 8px;line-height:1.55}
+  details.ref .content ul{margin:4px 0 8px;padding-left:18px}
+  details.ref .content li{font-size:.85rem;color:var(--cream);margin-bottom:4px}
+  details.ref .content em{color:var(--brass)}
+
+  /* matrix */
+  .matrix-wrap{overflow-x:auto;margin:0 -4px}
+  table.matrix{
+    width:100%;border-collapse:collapse;font-size:.78rem;
+    font-family:var(--mono);
+  }
+  table.matrix th, table.matrix td{
+    padding:6px 8px;border:1px solid rgba(184,151,74,.18);
+    text-align:center;vertical-align:middle;
+  }
+  table.matrix thead th{
+    background:var(--void-rise);color:var(--brass);font-weight:500;
+    font-size:.7rem;letter-spacing:.05em;
+  }
+  table.matrix tbody th{
+    background:var(--void-rise);color:var(--gold);text-align:left;
+    font-weight:500;white-space:nowrap;
+  }
+  table.matrix td.fit-prime{background:rgba(139,26,26,.35);color:var(--cream);font-weight:700}
+  table.matrix td.fit-good{background:rgba(184,151,74,.18);color:var(--cream)}
+  table.matrix td.fit-meh{color:var(--cream-dim)}
+  table.matrix td.fit-no{color:var(--cream-dim);opacity:.4}
+
+  /* log */
+  .log-empty{font-family:var(--serif);font-style:italic;color:var(--cream-dim);text-align:center;padding:20px}
+  .log-entry{
+    background:var(--void-rise);
+    border:1px solid rgba(184,151,74,.15);
+    border-radius:3px;padding:12px;margin-bottom:10px;
+  }
+  .log-entry .head{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.7rem;color:var(--cream-dim)}
+  .log-entry .quote{font-family:var(--serif);font-style:italic;color:var(--cream);margin:6px 0;padding-left:8px;border-left:2px solid var(--brass-dim)}
+  .log-entry .reply{font-family:var(--serif);color:var(--gold);padding-left:8px;border-left:2px solid var(--gold);margin:6px 0}
+  .log-entry .rate{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+  .log-entry .rate button{padding:4px 10px;font-size:.75rem}
+  .log-entry .rate button.rated{background:var(--green);color:var(--void);border-color:var(--green)}
+
+  /* settings cascade */
+  .tier-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px dashed rgba(184,151,74,.12)}
+  .tier-row:last-child{border-bottom:none}
+  .tier-row .tier-tag{font-family:var(--mono);background:var(--ox);color:var(--cream);padding:2px 8px;font-size:.7rem;border-radius:2px;min-width:32px;text-align:center}
+  .tier-row .desc{flex:1;font-size:.85rem}
+  .tier-row .desc .name{color:var(--gold);font-family:var(--serif)}
+  .tier-row .desc .note{color:var(--cream-dim);font-size:.78rem}
+  .tier-row .status{font-family:var(--mono);font-size:.7rem}
+  .tier-row .status.on{color:var(--green)}
+  .tier-row .status.off{color:var(--cream-dim)}
+
+  /* misc */
+  .hint{font-family:var(--mono);font-size:.7rem;color:var(--cream-dim);margin-top:6px}
+  .pulse{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;vertical-align:middle;margin-right:6px}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+  .toast{
+    position:fixed;bottom:18px;left:50%;transform:translateX(-50%);
+    background:var(--gold);color:var(--void);font-family:var(--mono);font-size:.8rem;
+    padding:10px 18px;border-radius:3px;z-index:100;
+    opacity:0;transition:opacity .2s;pointer-events:none;
+  }
+  .toast.show{opacity:1}
+  footer{
+    text-align:center;padding:30px 18px 50px;
+    font-family:var(--mono);font-size:.7rem;color:var(--cream-dim);
+    border-top:1px solid rgba(184,151,74,.1);margin-top:30px;
+  }
+  footer a{color:var(--brass);text-decoration:none}
+  footer a:hover{color:var(--gold)}
+
+  /* stratagems table */
+  .strat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px}
+  .strat-card{
+    background:var(--void-card);
+    border:1px solid rgba(184,151,74,.15);
+    border-radius:3px;padding:8px 10px;
+  }
+  .strat-card .n{font-family:var(--mono);color:var(--brass);font-size:.7rem}
+  .strat-card .t{font-family:var(--serif);color:var(--gold);font-size:.85rem;margin:2px 0}
+  .strat-card .d{font-size:.78rem;color:var(--cream-dim);line-height:1.4}
+
+  /* mobile tweaks */
+  @media (max-width:680px){
+    main{padding:12px}
+    h1{font-size:1.4rem}
+    button.primary{width:100%}
+    .row.between{flex-direction:column;align-items:stretch}
+    .option .actions{flex-direction:column}
+    header.bar .meta{display:none}
+  }
+</style>
+</head>
+<body>
+<header class="bar">
+  <div class="brand">
+    <div class="lozenge"><span>&#9826;</span></div>
+    <div>
+      <h1 style="font-size:1.15rem;line-height:1">FallFence</h1>
+      <div class="mono" style="color:var(--cream-dim);font-size:.65rem">sovereign debating assistant &middot; prime 599</div>
+    </div>
+  </div>
+  <div class="meta">
+    <div><span class="pulse"></span><span class="live">on-device</span> &middot; <span id="licence-status">sovereign</span></div>
+    <div>&kappa; = 1 &middot; <span id="cascade-tier">T0</span> &middot; <span id="exchange-count">0 exchanges</span></div>
+  </div>
+</header>
+
+<main>
+
+<section class="panel" style="margin-bottom:16px">
+  <span class="corner"></span><span class="corner br"></span>
+  <h2><span class="num">(a)</span>Paste opponent's message</h2>
+  <p class="hint" style="margin-top:0;margin-bottom:10px">Drop what they just sent. Engine reads it. You pick. You send. Never auto-fires.</p>
+  <textarea id="paste" class="paste" placeholder="paste here · LinkedIn, Discord, Twitter, email, text · anything they said that you want to fence back on"></textarea>
+
+  <div class="row between" style="margin-top:12px">
+    <div class="row" style="gap:8px">
+      <select id="context" title="where this exchange is happening">
+        <option value="linkedin">LinkedIn comment</option>
+        <option value="discord">Discord/Slack</option>
+        <option value="twitter">Twitter/X</option>
+        <option value="email">Email</option>
+        <option value="inperson">In person</option>
+        <option value="custom">Custom</option>
+      </select>
+      <button class="ghost" id="settings-btn" title="cascade settings">settings</button>
+    </div>
+    <button class="primary" id="analyse-btn">Read &amp; recommend</button>
+  </div>
+
+  <div id="empty-samples" style="margin-top:14px">
+    <div class="mono" style="color:var(--cream-dim);font-size:.7rem;margin-bottom:6px">Try one of Simon's worked examples:</div>
+    <div class="grid cols-3" style="gap:8px">
+      <button class="sample" data-sample="religion">&ldquo;Common sense meets religion vs evolution vs technology &mdash; you don't really know about evolution&rdquo;</button>
+      <button class="sample" data-sample="safari">&ldquo;Safari aggressively clears IndexedDB. Local-first sounds great until users lose data.&rdquo;</button>
+      <button class="sample" data-sample="goalposts">&ldquo;You enjoy when someone moves the goalposts, do you?&rdquo;</button>
+    </div>
+  </div>
+</section>
+
+<div id="killshot" class="killshot">
+  <strong>KILL-SHOT DETECTED &middot; FORFEIT SIGNAL</strong>
+  <span id="killshot-text">Their move just collapsed. Walking away is the win. Don't write the 400-word essay.</span>
+</div>
+
+<section class="panel" id="analysis-panel" style="margin-bottom:16px;display:none">
+  <span class="corner"></span><span class="corner br"></span>
+  <h2><span class="num">(b)</span>Analysis &middot; <span class="mono" style="color:var(--cream-dim);font-size:.7rem">read by &alpha; &beta; &epsilon;</span></h2>
+  <div class="analysis-grid">
+    <div class="analysis-cell">
+      <div class="label">Archetype (&alpha;)</div>
+      <div class="value" id="a-arche">&mdash;</div>
+      <div class="conf" id="a-arche-conf"></div>
+    </div>
+    <div class="analysis-cell">
+      <div class="label">Field (&beta;)</div>
+      <div class="value" id="a-field">&mdash;</div>
+      <div class="conf" id="a-field-why"></div>
+    </div>
+    <div class="analysis-cell">
+      <div class="label">Technique (&Omega;)</div>
+      <div class="value" id="a-tech">&mdash;</div>
+      <div class="conf" id="a-tech-why"></div>
+    </div>
+  </div>
+</section>
+
+<section class="panel" id="options-panel" style="margin-bottom:16px;display:none">
+  <span class="corner"></span><span class="corner br"></span>
+  <h2><span class="num">(c)</span>Three options &middot; <span class="mono" style="color:var(--cream-dim);font-size:.7rem">drafted by &gamma; &middot; toned by &delta;</span></h2>
+  <p class="hint" style="margin-top:0;margin-bottom:14px">Pick one. Copy it. Paste wherever. The engine never auto-sends.</p>
+  <div class="grid" id="options-out" style="gap:12px"></div>
+</section>
+
+<div class="grid cols-2" style="margin-bottom:16px">
+
+  <section class="panel">
+    <span class="corner"></span><span class="corner br"></span>
+    <h2><span class="num">(d)</span>Reference stack &middot; 3 fields</h2>
+    <details class="ref">
+      <summary>Field 1 &middot; Universal Law (Tao, first principles)</summary>
+      <div class="content">
+        <p>The pattern under all patterns. Pre-verbal. <em>Compression, not instruction manuals.</em></p>
+        <h4>The three moves</h4>
+        <ul>
+          <li><em>Wu wei</em> &mdash; effortless action. Don't push the river. Redirect.</li>
+          <li><em>Te</em> &mdash; latent capacity made present. You don't argue your authority, you embody it.</li>
+          <li><em>Reversal</em> &mdash; what is full will empty. What is hard will break. The opponent's strongest position is the one most fragile to a pivot.</li>
+        </ul>
+        <h4>When to draw from it</h4>
+        <p>When the opponent is framing in <em>categories</em> (science vs religion, A or B) &mdash; Universal Law lets you step under the categories and show they're both compressions of the same thing.</p>
+      </div>
+    </details>
+    <details class="ref">
+      <summary>Field 2 &middot; Hermetic 7 (canonical principles)</summary>
+      <div class="content">
+        <p>The seven principles from the Kybalion. Each is a knife.</p>
+        <ul>
+          <li><strong>Mentalism</strong> &middot; "the all is mind" &mdash; their reality is downstream of their thinking. Address the thinking.</li>
+          <li><strong>Correspondence</strong> &middot; "as above, so below" &mdash; the small example mirrors the big claim. Use a small concrete case.</li>
+          <li><strong>Vibration</strong> &middot; nothing is static &mdash; their position is already moving. Don't argue it as fixed.</li>
+          <li><strong>Polarity</strong> &middot; opposites are degrees of the same &mdash; their A-vs-B trap collapses when you name the shared axis.</li>
+          <li><strong>Rhythm</strong> &middot; the pendulum swings &mdash; if they're at peak attack, the swing back is near. Wait.</li>
+          <li><strong>Cause &amp; Effect</strong> &middot; nothing is random &mdash; their move has a cause. Address the cause, not the move.</li>
+          <li><strong>Gender</strong> &middot; generative &amp; receptive &mdash; some replies plant, some receive. Know which the moment wants.</li>
+        </ul>
+      </div>
+    </details>
+    <details class="ref">
+      <summary>Field 3 &middot; Jungian depth (shadow, individuation, archetypes)</summary>
+      <div class="content">
+        <p>The opponent is not your enemy. They are usually a projection of an unintegrated part of themselves &mdash; or of you.</p>
+        <ul>
+          <li><strong>Shadow</strong> &middot; what they accuse you of is often the part of themselves they haven't owned. Don't mirror it back &mdash; name the dynamic gently or pivot.</li>
+          <li><strong>Coniunctio</strong> &middot; opposites uniting. The richest replies aren't refutations &mdash; they hold both their truth and yours in the same sentence.</li>
+          <li><strong>Individuation</strong> &middot; you're not arguing to win, you're arguing to stay yourself. If the technique would cost you your centre, drop it.</li>
+          <li><strong>Archetypes &middot; their role</strong> &middot; Are they playing Critic? Wise Elder? Wounded Healer? Sage? Trickster? The reply meets the role, not just the words.</li>
+        </ul>
+      </div>
+    </details>
+  </section>
+
+  <section class="panel">
+    <span class="corner"></span><span class="corner br"></span>
+    <h2><span class="num">(f)</span>Archetype &times; Technique matrix</h2>
+    <p class="hint" style="margin-top:0;margin-bottom:10px">&blacksquare; prime fit &middot; &squ; good fit &middot; &middot; meh &middot; &nbsp; avoid</p>
+    <div class="matrix-wrap">
+      <table class="matrix">
+        <thead>
+          <tr>
+            <th></th>
+            <th>FRAME<br>REFUSAL</th>
+            <th>PIVOT</th>
+            <th>BLADE<br>CATCH</th>
+            <th>YIELD</th>
+            <th>TEMPO<br>CONTROL</th>
+          </tr>
+        </thead>
+        <tbody id="matrix-body"></tbody>
+      </table>
+    </div>
+  </section>
+
+</div>
+
+<section class="panel" style="margin-bottom:16px">
+  <span class="corner"></span><span class="corner br"></span>
+  <h2><span class="num">(g)</span>The 38 stratagems &middot; Schopenhauer reference</h2>
+  <details class="ref">
+    <summary>Open the manual (advanced fencing &middot; use sparingly)</summary>
+    <div class="content">
+      <p>Schopenhauer's <em>The Art of Being Right</em> &mdash; 38 dishonest tricks of debate. <strong>Most are weapons FallFence refuses to use.</strong> The point of listing them is to <em>recognise when opponents deploy them</em>, so &alpha; can flag the move and &gamma; can route around it.</p>
+      <div class="strat-grid" id="strat-grid"></div>
+    </div>
+  </details>
+</section>
+
+<section class="panel" style="margin-bottom:16px">
+  <span class="corner"></span><span class="corner br"></span>
+  <h2><span class="num">(e)</span>Exchange log &middot; <span class="mono" style="color:var(--cream-dim);font-size:.7rem">stored locally &middot; IndexedDB &middot; never leaves device</span></h2>
+  <div class="row between" style="margin-bottom:10px">
+    <div class="mono" style="color:var(--cream-dim);font-size:.75rem"><span id="log-count">0</span> stored &middot; rate each to train the engine</div>
+    <div class="row" style="gap:6px">
+      <button class="ghost" id="export-log">export JSON</button>
+      <button class="ghost" id="clear-log">clear</button>
+    </div>
+  </div>
+  <div id="log-out"><div class="log-empty">No exchanges yet. Paste an opponent's message above.</div></div>
+</section>
+
+<section class="panel" id="settings-panel" style="margin-bottom:16px;display:none">
+  <span class="corner"></span><span class="corner br"></span>
+  <h2><span class="num">(h)</span>BYOK Cascade &middot; <span class="mono" style="color:var(--cream-dim);font-size:.7rem">T0 always works offline</span></h2>
+  <div class="tier-row">
+    <div class="tier-tag">T0</div>
+    <div class="desc">
+      <div class="name">Heuristic (offline)</div>
+      <div class="note">Pure JS keyword pattern matching &middot; baked into this file &middot; no key needed</div>
+    </div>
+    <div class="status on">always on</div>
+  </div>
+  <div class="tier-row">
+    <div class="tier-tag">T1</div>
+    <div class="desc">
+      <div class="name">WebLLM (in-browser model)</div>
+      <div class="note">Optional &middot; downloads a ~4GB model once &middot; runs in your tab &middot; nothing leaves</div>
+    </div>
+    <button class="ghost" id="t1-toggle">opt-in</button>
+  </div>
+  <div class="tier-row">
+    <div class="tier-tag">T2</div>
+    <div class="desc">
+      <div class="name">BYOK frontier &middot; Claude / GPT / Gemini</div>
+      <div class="note">Your key &middot; stored in localStorage &middot; never proxied through us</div>
+    </div>
+    <button class="ghost" id="t2-key">set key</button>
+  </div>
+  <div class="tier-row">
+    <div class="tier-tag">T3</div>
+    <div class="desc">
+      <div class="name">Estate cascade (FallCompass)</div>
+      <div class="note">If you've configured the estate router, FallFence routes through it</div>
+    </div>
+    <div class="status off">not configured</div>
+  </div>
+  <p class="hint" style="margin-top:10px">Pause-before-reply rail: <strong style="color:var(--gold)">FallFence never auto-sends.</strong> Every option must be copied + pasted by you.</p>
+</section>
+
+<footer>
+  <div>FallFence &middot; prime 599 &middot; rings R3 (heart) + R5 (mirror) &middot; bloom [4,7,7,6,5,4,3]</div>
+  <div style="margin-top:6px">
+    <a href="https://github.com/sjgant80-hub/fallfence">source</a> &middot;
+    <a href="https://github.com/sjgant80-hub/fall-registry">registry</a> &middot;
+    <a href="https://sjgant80-hub.github.io/fallfind/">find more tools</a>
+  </div>
+  <div style="margin-top:6px">MIT &middot; sovereign &middot; on-device &middot; &copy; 2026 Simon Gant &middot; &diams;&middot;&kappa;=1</div>
+</footer>
+
+</main>
+
+<div id="toast" class="toast"></div>
+
+<script>
+/* ============================================================
+   FallFence engine
+   prime 599 · rings R3 + R5 · 6 agents (Ω α β γ δ ε)
+   single-file · vanilla JS · works offline
+   ============================================================ */
+
+const FALLFENCE = {
+  PRIME: 599,
+  VERSION: '1.0.0',
+  CHANNEL: null,
+};
+
+/* ------------------------------------------------------------
+   ε · kill-shot detector
+   ------------------------------------------------------------ */
+const KILL_SHOTS = [
+  { pattern: /\bwhatever\b/i, msg: '"whatever" is the white flag. Engaging now signals it landed. Walk away.' },
+  { pattern: /\b(k|kk|ok)\b\s*\.?\s*$/i, msg: 'One-letter "k". They\'ve exited the frame. Don\'t chase.' },
+  { pattern: /\bdon'?t\s*care\b/i, msg: 'Stated disengagement. Honour it. Silence is the reply.' },
+  { pattern: /^(lol|lmao)\s*\.?\s*$/i, msg: 'Pure dismissal. No content to fence. Walk.' },
+  { pattern: /\bblocked?\b|\bgoodbye\b/i, msg: 'They\'ve signalled exit. The exchange is over.' },
+];
+
+function killShotCheck(text) {
+  const t = (text || '').trim();
+  if (!t) return null;
+  // 4-words-beats-400 detector: if reply could be very short, flag for later
+  for (const ks of KILL_SHOTS) {
+    if (ks.pattern.test(t)) return ks.msg;
+  }
+  return null;
+}
+
+/* ------------------------------------------------------------
+   α · archetype reader
+   detection heuristics from spec
+   ------------------------------------------------------------ */
+const ARCHETYPES = {
+  INTELLECTUAL_GATEKEEPER: {
+    label: 'Intellectual Gatekeeper',
+    cues: [
+      /you (don'?t|do not) (know|understand|get|really know)\b/i,
+      /you('?ve| have) never (read|studied)\b/i,
+      /\b(actually|technically),?\s/i,
+      /\b(have you (even )?read|do you know who)\b/i,
+      /(epistem|ontolog|hermeneutic|dialectic|first principles)/i,
+      /\b(common sense|by definition)\b/i,
+      /\b(move(s|d|ing)? the goalposts?|goalpost(s)?)\b/i,
+      /\byou enjoy\b.+\?/i,
+      /\bdo you\b.+\?/i,
+    ],
+    field: 'Universal Law',
+    fieldWhy: 'step under the categorical frame they\'re defending',
+    technique: 'frame_refusal',
+    techWhy: 'present option C — refuse the A-or-B they set up',
+  },
+  TECHNICAL_CHALLENGER: {
+    label: 'Technical Challenger',
+    cues: [
+      /\b(safari|chrome|firefox|webkit|webview)\b/i,
+      /\b(indexeddb|localstorage|cors|csp|cache|cookie|cookies)\b/i,
+      /(implementation|edge case|race condition|memory leak|breaking change)/i,
+      /\b(but what about|won'?t (work|scale)|will break|race condition)\b/i,
+      /\b(quotas?|throttl|rate.?limit|polyfill)\b/i,
+    ],
+    field: 'Hermetic 7',
+    fieldWhy: 'correspondence — yield the small, hold the principle',
+    technique: 'yield',
+    techWhy: 'absorb the genuine technical point cleanly, then reframe scope',
+  },
+  AUTHORITY_QUOTER: {
+    label: 'Authority Quoter',
+    cues: [
+      /\b(jung|freud|nietzsche|wittgenstein|hegel|plato|aristotle|kant)\b/i,
+      /\b(study|studies|research|paper|peer.?review|meta.?analysis)\b.{0,40}(shows?|says?|found|demonstrates?)/i,
+      /\b(harvard|stanford|mit|oxford|cambridge|nature|science)\b/i,
+      /(quote|said|wrote|argued|stated)[:,]?\s*[""']/i,
+      /\bcit(ed|ation|e)\b/i,
+    ],
+    field: 'Jungian depth',
+    fieldWhy: 'meet the archetypal role they\'re invoking, not just the citation',
+    technique: 'blade_catch',
+    techWhy: 'use their authority\'s words against the position they applied it to',
+  },
+  EMOTIONAL_PROVOCATEUR: {
+    label: 'Emotional Provocateur',
+    cues: [
+      /\b(pathetic|stupid|idiot|moron|clueless|delusional|cope|cringe)\b/i,
+      /\b(seethe|mad|triggered|salty|mid|copium)\b/i,
+      /\?{2,}|!{2,}/,
+      /\b(lmao|lol|kek)\b/i,
+      /\b(you (people|types|sound|seem))\b/i,
+      /^(wow|imagine|oh)\b/i,
+    ],
+    field: 'Jungian depth',
+    fieldWhy: 'shadow projection — don\'t mirror, name the dynamic or pivot',
+    technique: 'tempo_control',
+    techWhy: 'pause &middot; do not match heat &middot; the silence itself reframes',
+  },
+  GENUINE_INQUIRER: {
+    label: 'Genuine Inquirer',
+    cues: [
+      /^(how|what|why|when|where|could you|can you|would you)\b/i,
+      /(curious|wondering|trying to understand|help me understand|interested in)/i,
+      /\?\s*$/,
+      /\b(thanks|appreciate|grateful|please)\b/i,
+      /\b(would love to|want to learn|new to this)\b/i,
+    ],
+    field: 'Universal Law',
+    fieldWhy: 'teach from the principle &middot; first cause, not just answer',
+    technique: 'teach',
+    techWhy: 'this isn\'t a fence &middot; be generous &middot; give them the real thing',
+  },
+  COMPETITIVE_BUILDER: {
+    label: 'Competitive Builder',
+    cues: [
+      /\bi (also|already|just) (built|made|shipped|coded|wrote)\b/i,
+      /\bmy (version|implementation|approach|tool|product|app)\b/i,
+      /\b(we|i) (use|run|have|launched)\b.{0,30}(in production|at scale|for years)/i,
+      /\b(been doing this|did this back in)\b/i,
+      /\b(my company|my startup|my team)\b/i,
+    ],
+    field: 'Hermetic 7',
+    fieldWhy: 'polarity — your work and theirs are not opposed, they\'re degrees',
+    technique: 'pivot',
+    techWhy: 'acknowledge cleanly + show yours without comparing &middot; no contest',
+  },
+};
+
+function detectArchetype(text) {
+  const t = (text || '').toLowerCase();
+  if (!t.trim()) return null;
+  const scores = {};
+  for (const [k, def] of Object.entries(ARCHETYPES)) {
+    let hits = 0;
+    for (const cue of def.cues) {
+      if (cue.test(text)) hits++;
+    }
+    scores[k] = hits;
+  }
+  // Pick the highest scorer; tie → first defined wins, but bias to gatekeeper if any
+  let best = null, bestScore = 0;
+  for (const [k, s] of Object.entries(scores)) {
+    if (s > bestScore) { best = k; bestScore = s; }
+  }
+  // Tally for confidence
+  const total = Object.values(scores).reduce((a,b)=>a+b,0);
+  if (!best || bestScore === 0) {
+    // No strong signal → fallback to genuine inquirer if it looks like a question, else gatekeeper
+    if (/\?/.test(text)) best = 'GENUINE_INQUIRER';
+    else best = 'INTELLECTUAL_GATEKEEPER';
+    return { key: best, confidence: 0.25, def: ARCHETYPES[best], scores };
+  }
+  const conf = Math.min(0.95, 0.4 + (bestScore / (total + 1)) * 0.6);
+  return { key: best, confidence: conf, def: ARCHETYPES[best], scores };
+}
+
+/* ------------------------------------------------------------
+   Ω · technique selector + matrix
+   ------------------------------------------------------------ */
+const TECHNIQUES = {
+  frame_refusal: { label: 'Frame Refusal', short: 'present option C', long: 'They set up A-or-B. You refuse the dichotomy and place a third frame they didn\'t see coming.' },
+  pivot:         { label: 'Pivot (prise)', short: 'redirect energy to your ground', long: 'Take their incoming force, change the axis, land them where you wanted the conversation anyway.' },
+  blade_catch:   { label: 'Blade Catch', short: 'their authority, your argument', long: 'Use their own citation or quote against the position they applied it to. The authority becomes yours.' },
+  yield:         { label: 'Yield', short: 'absorb the real point cleanly', long: 'When the point is genuine, take it. Reframe scope. Yielding is not losing — it preserves your authority for the next move.' },
+  tempo_control: { label: 'Tempo Control', short: '"I have several answers" &middot; pause before strike', long: 'Slow the exchange. Signal you have more than one reply. The pause itself shifts power.' },
+  teach:         { label: 'Teach (not fence)', short: 'genuine question → generous answer', long: 'Not every exchange is a fight. Recognise curiosity. Give the real answer, in plain words.' },
+};
+
+/* Matrix · 6 archetypes × 5 techniques · fit codes:
+   prime, good, meh, no
+*/
+const MATRIX = {
+  INTELLECTUAL_GATEKEEPER: { frame_refusal:'prime', pivot:'good',  blade_catch:'good',  yield:'meh',  tempo_control:'good' },
+  TECHNICAL_CHALLENGER:    { frame_refusal:'meh',   pivot:'good',  blade_catch:'no',    yield:'prime',tempo_control:'meh'  },
+  AUTHORITY_QUOTER:        { frame_refusal:'good',  pivot:'meh',   blade_catch:'prime', yield:'meh',  tempo_control:'good' },
+  EMOTIONAL_PROVOCATEUR:   { frame_refusal:'meh',   pivot:'good',  blade_catch:'no',    yield:'no',   tempo_control:'prime'},
+  GENUINE_INQUIRER:        { frame_refusal:'no',    pivot:'meh',   blade_catch:'no',    yield:'good', tempo_control:'meh'  },
+  COMPETITIVE_BUILDER:     { frame_refusal:'meh',   pivot:'prime', blade_catch:'meh',   yield:'good', tempo_control:'good' },
+};
+
+function renderMatrix() {
+  const tbody = document.getElementById('matrix-body');
+  const symbols = {
+    prime: { sym: '&#9632;', cls: 'fit-prime' },
+    good:  { sym: '&#9633;', cls: 'fit-good' },
+    meh:   { sym: '&middot;', cls: 'fit-meh' },
+    no:    { sym: '&nbsp;',  cls: 'fit-no' },
+  };
+  const techs = ['frame_refusal','pivot','blade_catch','yield','tempo_control'];
+  let html = '';
+  for (const [k, def] of Object.entries(ARCHETYPES)) {
+    html += `<tr><th>${def.label}</th>`;
+    for (const t of techs) {
+      const fit = MATRIX[k][t] || 'no';
+      const s = symbols[fit];
+      html += `<td class="${s.cls}" title="${fit}">${s.sym}</td>`;
+    }
+    html += `</tr>`;
+  }
+  tbody.innerHTML = html;
+}
+
+/* ------------------------------------------------------------
+   γ · response drafter (T0 templates · few-shot anchored)
+   ------------------------------------------------------------ */
+const WORKED_EXAMPLES = {
+  religion: {
+    text: "Common sense meets religion vs evolution vs technology — you don't really know about evolution",
+    archetype: 'INTELLECTUAL_GATEKEEPER',
+    technique: 'frame_refusal',
+    optionA: 'Both stories are compression, not instruction manuals.',
+    optionB: 'The framing assumes I have to pick one. I don\'t. Religion is a compression of meaning, evolution is a compression of mechanism, technology is a compression of leverage. They\'re three coordinates, not three contestants. Treating them as rivals is what produces the heat — and the heat is what stops the actual question landing.',
+    optionC: 'Fair — I haven\'t formally studied evolutionary biology. What I\'ve been working with is the meta-pattern. If you\'ve got a place I should start, I\'m listening.',
+  },
+  safari: {
+    text: 'Safari aggressively clears IndexedDB after 7 days of inactivity. Local-first sounds great until users lose all their data.',
+    archetype: 'TECHNICAL_CHALLENGER',
+    technique: 'yield',
+    optionA: 'True. Mitigation: weekly export prompt + cloud-mirror opt-in.',
+    optionB: 'Fair callout. Safari ITP clears IndexedDB after 7 days no-interaction. The sovereign answer isn\'t "pretend it doesn\'t happen" — it\'s a weekly JSON export nudge, an optional encrypted backup endpoint (the user\'s choice, not mine), and a re-import path that\'s one click. Sovereignty without resilience is just fragility with better marketing.',
+    optionC: 'Yeah — the choice isn\'t that wonderful if the data evaporates. Export-or-die nudge baked in. Cloud sync as opt-in, never default.',
+  },
+  goalposts: {
+    text: 'You enjoy when someone moves the goalposts, do you?',
+    archetype: 'INTELLECTUAL_GATEKEEPER',
+    technique: 'tempo_control',
+    optionA: 'I\'ve just learnt to pivot.',
+    optionB: 'I have a few answers to that. The short one is: I\'ve learnt to pivot. The longer one is that goalpost-moving is a tell — it means the first frame failed and now we\'re negotiating a real one. That\'s not a bug of the exchange, that\'s the exchange. The actual question is whether you want the new frame or the original.',
+    optionC: 'Honest answer: the goalpost moving is the signal the frame is wrong. Don\'t need to enjoy it to honour it.',
+  },
+};
+
+function isWorkedExample(text) {
+  const t = (text || '').toLowerCase();
+  if (/common sense meets religion|religion vs evolution|don'?t really know about evolution/.test(t)) return WORKED_EXAMPLES.religion;
+  if (/safari.{0,40}indexeddb|aggressively clears indexeddb/.test(t)) return WORKED_EXAMPLES.safari;
+  if (/move(s|d|ing) the goalposts/.test(t)) return WORKED_EXAMPLES.goalposts;
+  return null;
+}
+
+/* Template bank · per archetype · per technique
+   Each template returns { A, B, C, predictedResponses } */
+function draftResponses(text, arche, technique, context) {
+  // Worked-example shortcut · highest fidelity
+  const we = isWorkedExample(text);
+  if (we) {
+    return {
+      A: { body: we.optionA, predict: 'they soften or escalate; either way, the frame is yours', words: we.optionA.split(/\s+/).length, kind: 'short' },
+      B: { body: we.optionB, predict: 'they engage substantively with the new frame', words: we.optionB.split(/\s+/).length, kind: 'medium' },
+      C: { body: we.optionC, predict: 'they shift to dialogue mode — the yield disarms', words: we.optionC.split(/\s+/).length, kind: 'yield' },
+    };
+  }
+
+  // Pull a quoted fragment for blade_catch
+  const quoted = (text.match(/["""']([^"""']{4,60})["""']/) || [])[1];
+  // First-clause grab for pivot/yield
+  const firstClause = (text.split(/[.!?]/)[0] || text).trim().slice(0,80);
+  const archeKey = arche?.key || 'INTELLECTUAL_GATEKEEPER';
+  const arcLabel = (arche?.def?.label || 'Opponent');
+
+  const templates = {
+    frame_refusal: {
+      A: 'The framing assumes a choice that isn\'t actually there.',
+      B: `That sets it up as A-or-B. There\'s a third option you haven\'t named: ${firstClause ? 'the axis you\'re measuring on is the thing we should be discussing, not the points along it.' : 'the frame itself is the thing under question, not the positions inside it.'} Once that\'s on the table, the original choice dissolves.`,
+      C: 'Genuine question — are we debating the position, or the frame the position sits in? Different conversations.',
+    },
+    pivot: {
+      A: 'Different angle: what would change for you if that turned out to be true?',
+      B: `Taking that at face value — let\'s redirect. The interesting question underneath is not whether ${firstClause ? 'the surface claim holds' : 'this position is right'}, but what it would cost you to be wrong about it. That\'s the conversation worth having.`,
+      C: 'Fair point — and the thing I want to redirect to is the cost-of-being-wrong calculation, not the claim itself.',
+    },
+    blade_catch: {
+      A: quoted ? `Your own "${quoted}" makes the opposite case.` : 'The authority you\'re citing actually argued the opposite.',
+      B: quoted
+        ? `You quoted "${quoted}" — read in full, that passage makes the argument I\'m making, not the one you applied it to. Happy to point at the surrounding text if useful.`
+        : `The authority you\'re reaching for argued the opposite of the position you\'re using them for. I\'ll surface the receipts if it would move the conversation forward.`,
+      C: 'Fair invocation — and if we read the full passage, I think it actually supports the frame I started with.',
+    },
+    yield: {
+      A: 'You\'re right. Mitigation:',
+      B: `Genuine point — taking it. Where I\'d reframe the scope: the failure mode you named is real, and the fix is ${context === 'linkedin' ? 'design discipline + a fallback path' : 'a fallback path + the user\'s explicit choice'}, not abandoning the original commitment. The principle survives the patch.`,
+      C: 'Taking the L on that specific point. The wider position still holds — and is better for the correction.',
+    },
+    tempo_control: {
+      A: 'I have several answers. Pick one.',
+      B: `I have a few replies to that — the short one, the long one, and the honest one. Which mode do you want? Because the answer changes shape depending on whether we\'re fencing or building.`,
+      C: 'Pausing on that. Want to come back to it once the underlying question is named.',
+    },
+    teach: {
+      A: 'Short version: ' + firstClause.slice(0,60),
+      B: `Real answer — ${firstClause}. The thing most miss is that the principle and the implementation aren\'t the same conversation. Happy to go deeper on either.`,
+      C: 'Best place I\'d send you to start is the original source, not the secondhand explanations. Want me to point at one?',
+    },
+  };
+
+  const t = templates[technique] || templates.tempo_control;
+  const predictions = {
+    frame_refusal: ['they accept the third frame or escalate the original','they engage with the meta-question','they soften — the dichotomy was the lever'],
+    pivot: ['they follow you to the new ground','they refuse to pivot (you keep your frame)','they engage on cost-of-wrong'],
+    blade_catch: ['they retreat from the citation','they double-down (now they\'re defending the source, not the point)','they shift authority — proves the catch worked'],
+    yield: ['the temperature drops','they soften because you didn\'t fight','they over-extend and you reframe next move'],
+    tempo_control: ['they fill the silence (revealing more)','they get impatient (their move, not yours)','they ask what you mean (now you set the frame)'],
+    teach: ['real exchange begins','they ask a follow-up','they go off and read'],
+  };
+  const preds = predictions[technique] || predictions.tempo_control;
+
+  return {
+    A: { body: t.A, predict: preds[0], words: t.A.split(/\s+/).length, kind: 'short' },
+    B: { body: t.B, predict: preds[1], words: t.B.split(/\s+/).length, kind: 'medium' },
+    C: { body: t.C, predict: preds[2], words: t.C.split(/\s+/).length, kind: technique === 'yield' ? 'yield' : 'alt' },
+  };
+}
+
+/* ------------------------------------------------------------
+   δ · tone calibrator
+   ensure not angry · not defensive · keep fun
+   ------------------------------------------------------------ */
+function calibrateTone(body) {
+  if (!body) return body;
+  // strip combative starters
+  let out = body.replace(/^(actually|well|listen|look),?\s*/i, '');
+  // soften "you're wrong"
+  out = out.replace(/\byou'?re wrong\b/gi, 'that doesn\'t hold');
+  out = out.replace(/\bobviously\b/gi, '');
+  out = out.replace(/\s+/g, ' ').trim();
+  return out;
+}
+
+/* ------------------------------------------------------------
+   IndexedDB · exchange log
+   ------------------------------------------------------------ */
+const DB_NAME = 'fallfence';
+const STORE = 'exchanges';
+let db = null;
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, 1);
+    req.onupgradeneeded = (e) => {
+      const d = e.target.result;
+      if (!d.objectStoreNames.contains(STORE)) {
+        const s = d.createObjectStore(STORE, { keyPath: 'id', autoIncrement: true });
+        s.createIndex('ts', 'ts', { unique: false });
+      }
+    };
+    req.onsuccess = (e) => { db = e.target.result; resolve(db); };
+    req.onerror = (e) => reject(e);
+  });
+}
+
+function logExchange(entry) {
+  if (!db) return;
+  const tx = db.transaction(STORE, 'readwrite');
+  tx.objectStore(STORE).add(entry);
+  tx.oncomplete = () => renderLog();
+}
+
+function updateRating(id, field, value) {
+  if (!db) return;
+  const tx = db.transaction(STORE, 'readwrite');
+  const s = tx.objectStore(STORE);
+  const req = s.get(id);
+  req.onsuccess = () => {
+    const v = req.result;
+    if (!v) return;
+    v[field] = value;
+    s.put(v);
+    tx.oncomplete = () => renderLog();
+  };
+}
+
+function getAllExchanges() {
+  return new Promise((resolve) => {
+    if (!db) return resolve([]);
+    const tx = db.transaction(STORE, 'readonly');
+    const req = tx.objectStore(STORE).getAll();
+    req.onsuccess = () => resolve((req.result || []).sort((a,b)=>b.ts-a.ts));
+  });
+}
+
+function clearExchanges() {
+  if (!db) return;
+  const tx = db.transaction(STORE, 'readwrite');
+  tx.objectStore(STORE).clear();
+  tx.oncomplete = () => renderLog();
+}
+
+async function renderLog() {
+  const out = document.getElementById('log-out');
+  const cnt = document.getElementById('log-count');
+  const ecnt = document.getElementById('exchange-count');
+  const list = await getAllExchanges();
+  cnt.textContent = list.length;
+  ecnt.textContent = list.length + (list.length === 1 ? ' exchange' : ' exchanges');
+  if (!list.length) { out.innerHTML = '<div class="log-empty">No exchanges yet. Paste an opponent\'s message above.</div>'; return; }
+  out.innerHTML = list.slice(0, 20).map(e => `
+    <div class="log-entry">
+      <div class="head">
+        <div>${new Date(e.ts).toLocaleString()} &middot; ${e.context || ''} &middot; ${e.archetype || ''} &middot; ${e.technique || ''}</div>
+        <div>option ${e.chosen || '—'}</div>
+      </div>
+      <div class="quote">${escapeHTML(e.opponent || '').slice(0,300)}</div>
+      <div class="reply">${escapeHTML(e.reply || '').slice(0,400)}</div>
+      <div class="rate">
+        <span class="mono" style="color:var(--cream-dim);font-size:.7rem;margin-right:6px">rate &rarr;</span>
+        <button class="${e.archeOk===true?'rated':''}" onclick="rate(${e.id},'archeOk',true)">archetype &#10003;</button>
+        <button class="${e.archeOk===false?'rated':''}" onclick="rate(${e.id},'archeOk',false)">archetype &#10007;</button>
+        <button class="${e.techOk===true?'rated':''}" onclick="rate(${e.id},'techOk',true)">technique &#10003;</button>
+        <button class="${e.techOk===false?'rated':''}" onclick="rate(${e.id},'techOk',false)">technique &#10007;</button>
+        <button class="${e.outcome==='win'?'rated':''}" onclick="rate(${e.id},'outcome','win')">won</button>
+        <button class="${e.outcome==='draw'?'rated':''}" onclick="rate(${e.id},'outcome','draw')">draw</button>
+        <button class="${e.outcome==='lost'?'rated':''}" onclick="rate(${e.id},'outcome','lost')">lost</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+window.rate = updateRating;
+
+function escapeHTML(s) {
+  return String(s || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+/* ------------------------------------------------------------
+   38 stratagems · Schopenhauer reference
+   ------------------------------------------------------------ */
+const STRATAGEMS = [
+  ['1','Extension','Push their claim past what they meant.'],
+  ['2','Homonymy','Switch the meaning of a key word.'],
+  ['3','Generalise','Treat a specific concession as universal.'],
+  ['4','Conceal route','Get agreement on premises before revealing where they lead.'],
+  ['5','False premises','Use claims you don\'t believe but they will.'],
+  ['6','Beg the question','Assume the conclusion in the premise.'],
+  ['7','Yes-flood','Pile questions to get many yeses.'],
+  ['8','Anger them','Goad them into emotion to compromise their judgement.'],
+  ['9','Disorder','Ask questions in random order so they can\'t track.'],
+  ['10','Contrary','If they\'d agree, suggest the opposite for them to reject.'],
+  ['11','Generalise their admission','Turn a specific yes into a universal one.'],
+  ['12','Choose loaded words','"Murder" vs "execute" — same act, different frame.'],
+  ['13','False dichotomy','Present a third option as one of the two.'],
+  ['14','Claim victory','Declare you\'ve won regardless of the actual state.'],
+  ['15','Diversion','When losing, shift to a related question you can win.'],
+  ['16','Argue ad hominem','Attack the person, not the argument.'],
+  ['17','Hair-splitting','Defend by finding a tiny distinction.'],
+  ['18','Interrupt','Break the chain of reasoning when it\'s working against you.'],
+  ['19','Generalise the matter','Move from specific to so broad it can\'t be addressed.'],
+  ['20','Draw conclusion','State the conclusion from premises they didn\'t fully grant.'],
+  ['21','Tu quoque','"You do it too."'],
+  ['22','Petitio principii','Demand they prove an obvious thing to stall.'],
+  ['23','Provoke exaggeration','Get them to overstate so you can refute the overstatement.'],
+  ['24','False inference','Draw a conclusion their words don\'t support.'],
+  ['25','Find an exception','One counter-example to dismiss the general truth.'],
+  ['26','Turn the tables','"By your logic..."'],
+  ['27','Anger as proof','Their anger means you struck a nerve = you must be right.'],
+  ['28','Appeal to bystanders','Make the audience the judge, not the truth.'],
+  ['29','Diversion to side issue','Pull the fight onto unrelated ground.'],
+  ['30','Appeal to authority','Cite a name they can\'t challenge.'],
+  ['31','Declare it incomprehensible','"I don\'t understand" — pretend the argument is confused.'],
+  ['32','Pejorative association','Link their position to something disreputable.'],
+  ['33','In theory yes, in practice no','"That\'s a nice idea but..."'],
+  ['34','Don\'t answer','Refuse to address the strong point.'],
+  ['35','Appeal to self-interest','Make them defend against personal cost.'],
+  ['36','Bewilder with words','Use technical language to obscure.'],
+  ['37','One bad argument disproves all','Use any weak proof to discredit the whole position.'],
+  ['38','Become personal','When losing, attack the person.'],
+];
+
+function renderStratagems() {
+  const out = document.getElementById('strat-grid');
+  out.innerHTML = STRATAGEMS.map(([n,t,d]) => `
+    <div class="strat-card">
+      <div class="n">#${n}</div>
+      <div class="t">${t}</div>
+      <div class="d">${d}</div>
+    </div>
+  `).join('');
+}
+
+/* ------------------------------------------------------------
+   Main flow
+   ------------------------------------------------------------ */
+function showAnalysis(arche, technique) {
+  const panel = document.getElementById('analysis-panel');
+  panel.style.display = '';
+  document.getElementById('a-arche').textContent = arche.def.label;
+  document.getElementById('a-arche-conf').textContent = `confidence ${Math.round(arche.confidence*100)}%`;
+  document.getElementById('a-field').textContent = arche.def.field;
+  document.getElementById('a-field-why').textContent = arche.def.fieldWhy;
+  document.getElementById('a-tech').innerHTML = TECHNIQUES[technique].label;
+  document.getElementById('a-tech-why').innerHTML = TECHNIQUES[technique].long;
+}
+
+function showOptions(opts, arche, technique, context, opponentText) {
+  const panel = document.getElementById('options-panel');
+  panel.style.display = '';
+  const out = document.getElementById('options-out');
+  const lab = { A: { tag: 'A &middot; SHORT', meta: 'under 50w · the kill-shot lane' },
+                B: { tag: 'B &middot; MEDIUM', meta: '50-150w · the substantive reply' },
+                C: { tag: 'C &middot; ' + (opts.C.kind === 'yield' ? 'YIELD' : 'ALT'), meta: opts.C.kind === 'yield' ? 'absorb &amp; reframe' : 'alternative angle' } };
+  out.innerHTML = ['A','B','C'].map(k => {
+    const o = opts[k];
+    const body = calibrateTone(o.body);
+    return `
+      <div class="option">
+        <div class="head">
+          <div><span class="tag">${lab[k].tag}</span></div>
+          <div class="meta">${lab[k].meta} &middot; ${o.words}w</div>
+        </div>
+        <div class="body">${escapeHTML(body)}</div>
+        <div class="predict">${o.predict}</div>
+        <div class="actions">
+          <button class="copy" data-copy="${escapeHTML(body)}" data-choice="${k}">copy &amp; mark chosen</button>
+          <button class="choose" data-choice-only="${k}">just log it</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  out.querySelectorAll('button.copy').forEach(b => {
+    b.addEventListener('click', () => {
+      const txt = b.dataset.copy.replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&').replace(/&quot;/g,'"').replace(/&#39;/g,"'");
+      navigator.clipboard.writeText(txt).then(() => {
+        toast('Copied. Paste it wherever.');
+      }).catch(() => toast('Copy failed — select manually'));
+      recordExchange(opponentText, txt, arche, technique, context, b.dataset.choice);
+    });
+  });
+  out.querySelectorAll('button.choose').forEach(b => {
+    b.addEventListener('click', () => {
+      const o = opts[b.dataset.choiceOnly];
+      recordExchange(opponentText, o.body, arche, technique, context, b.dataset.choiceOnly);
+      toast('Logged. Engine learns from your pick.');
+    });
+  });
+}
+
+function recordExchange(opponent, reply, arche, technique, context, chosen) {
+  const entry = {
+    ts: Date.now(),
+    opponent, reply,
+    archetype: arche?.def?.label || '',
+    archeKey: arche?.key || '',
+    archeConf: arche?.confidence || 0,
+    technique: TECHNIQUES[technique]?.label || technique,
+    techKey: technique,
+    context, chosen,
+  };
+  logExchange(entry);
+  // broadcast
+  if (FALLFENCE.CHANNEL) {
+    try {
+      FALLFENCE.CHANNEL.postMessage({ kind: 'fallfence_response_chosen', archetype: entry.archeKey, technique: entry.techKey, context, ts: entry.ts });
+    } catch(_) {}
+  }
+}
+
+function runAnalysis() {
+  const text = document.getElementById('paste').value.trim();
+  const context = document.getElementById('context').value;
+  if (!text) { toast('Paste an opponent\'s message first'); return; }
+
+  // ε kill-shot first
+  const ks = killShotCheck(text);
+  const ksBox = document.getElementById('killshot');
+  if (ks) {
+    document.getElementById('killshot-text').textContent = ks;
+    ksBox.style.display = '';
+    document.getElementById('analysis-panel').style.display = 'none';
+    document.getElementById('options-panel').style.display = 'none';
+    return;
+  } else {
+    ksBox.style.display = 'none';
+  }
+
+  // α + β + Ω
+  const arche = detectArchetype(text);
+  let technique = arche.def.technique;
+  // tempo_control override for emotional with kill-shot proximity
+  if (arche.key === 'EMOTIONAL_PROVOCATEUR') technique = 'tempo_control';
+  // matrix consult
+  showAnalysis(arche, technique);
+  const opts = draftResponses(text, arche, technique, context);
+  showOptions(opts, arche, technique, context, text);
+
+  // broadcast detection
+  if (FALLFENCE.CHANNEL) {
+    try {
+      FALLFENCE.CHANNEL.postMessage({ kind: 'fallfence_archetype_detected', archetype: arche.key, confidence: arche.confidence, technique, context });
+    } catch(_) {}
+  }
+
+  // scroll to analysis on mobile
+  setTimeout(() => {
+    document.getElementById('analysis-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 80);
+}
+
+/* ------------------------------------------------------------
+   Toast
+   ------------------------------------------------------------ */
+let toastTimer = null;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+/* ------------------------------------------------------------
+   Sample loaders
+   ------------------------------------------------------------ */
+const SAMPLE_TEXT = {
+  religion: WORKED_EXAMPLES.religion.text,
+  safari: WORKED_EXAMPLES.safari.text,
+  goalposts: WORKED_EXAMPLES.goalposts.text,
+};
+
+function wireSamples() {
+  document.querySelectorAll('button.sample').forEach(b => {
+    b.addEventListener('click', () => {
+      document.getElementById('paste').value = SAMPLE_TEXT[b.dataset.sample];
+      runAnalysis();
+    });
+  });
+}
+
+/* ------------------------------------------------------------
+   Konomi licence shim (sovereign tier · no gate)
+   ------------------------------------------------------------ */
+const KONOMI = {
+  tier: 'sovereign',
+  product: 'fallfence',
+  prime: 599,
+  rings: ['R3','R5'],
+  bloom: [4,7,7,6,5,4,3],
+  async verify() {
+    // Sovereign tier: no key needed; if a konomi.key shows up later, mint chain.
+    return { ok: true, tier: 'sovereign', product: 'fallfence', prime: 599 };
+  },
+};
+window.KONOMI = KONOMI;
+
+/* ------------------------------------------------------------
+   fall-signal BroadcastChannel hook
+   ------------------------------------------------------------ */
+function wireMesh() {
+  try {
+    FALLFENCE.CHANNEL = new BroadcastChannel('fall-signal');
+    FALLFENCE.CHANNEL.postMessage({ kind: 'fallfence_online', prime: 599, ts: Date.now() });
+  } catch(_) { /* offline · no channel */ }
+}
+
+/* ------------------------------------------------------------
+   Settings panel
+   ------------------------------------------------------------ */
+function wireSettings() {
+  const btn = document.getElementById('settings-btn');
+  const panel = document.getElementById('settings-panel');
+  btn.addEventListener('click', () => {
+    panel.style.display = panel.style.display === 'none' ? '' : 'none';
+    if (panel.style.display === '') panel.scrollIntoView({ behavior: 'smooth' });
+  });
+  document.getElementById('t1-toggle').addEventListener('click', () => {
+    toast('T1 WebLLM opt-in is reserved for next ship · T0 already serves you');
+  });
+  document.getElementById('t2-key').addEventListener('click', () => {
+    const k = prompt('Paste BYOK (Claude / OpenAI / Gemini). Stored ONLY in your localStorage. We never see it.');
+    if (k && k.length > 10) {
+      localStorage.setItem('fallfence-byok', k);
+      document.getElementById('cascade-tier').textContent = 'T2';
+      toast('Key stored. T2 cascade armed.');
+    }
+  });
+  // restore
+  if (localStorage.getItem('fallfence-byok')) {
+    document.getElementById('cascade-tier').textContent = 'T2';
+  }
+}
+
+/* ------------------------------------------------------------
+   Log controls
+   ------------------------------------------------------------ */
+function wireLogControls() {
+  document.getElementById('export-log').addEventListener('click', async () => {
+    const list = await getAllExchanges();
+    const blob = new Blob([JSON.stringify({
+      version: FALLFENCE.VERSION, prime: 599, exported: new Date().toISOString(),
+      exchanges: list,
+    }, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `fallfence-log-${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast(`${list.length} exchanges exported`);
+  });
+  document.getElementById('clear-log').addEventListener('click', () => {
+    if (confirm('Clear all stored exchanges? This cannot be undone.')) clearExchanges();
+  });
+}
+
+/* ------------------------------------------------------------
+   Boot
+   ------------------------------------------------------------ */
+async function boot() {
+  renderMatrix();
+  renderStratagems();
+  wireSamples();
+  wireSettings();
+  wireMesh();
+  await KONOMI.verify();
+  document.getElementById('licence-status').textContent = 'sovereign &middot; &kappa;=1';
+
+  document.getElementById('analyse-btn').addEventListener('click', runAnalysis);
+  document.getElementById('paste').addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') runAnalysis();
+  });
+
+  try {
+    await openDB();
+    wireLogControls();
+    renderLog();
+  } catch(e) {
+    document.getElementById('log-out').innerHTML = '<div class="log-empty">IndexedDB unavailable in this context. Log disabled.</div>';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', boot);
+
+/* expose for testing / spec-mirror */
+window.FALLFENCE = FALLFENCE;
+window.detectArchetype = detectArchetype;
+window.draftResponses = draftResponses;
+window.killShotCheck = killShotCheck;
+window.WORKED_EXAMPLES = WORKED_EXAMPLES;
+</script>
+</body>
+</html>

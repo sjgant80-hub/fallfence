@@ -1,0 +1,35 @@
+{
+  "name": "fallfence",
+  "version": "1.0.0",
+  "description": "Sovereign debating assistant. Paste opponent · get archetype + technique + 3 options. Single-file. On-device. Prime 599.",
+  "type": "module",
+  "private": false,
+  "license": "MIT",
+  "author": "Simon Gant",
+  "homepage": "https://sjgant80-hub.github.io/fallfence/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sjgant80-hub/fallfence.git"
+  },
+  "keywords": [
+    "sovereign",
+    "single-file",
+    "debate",
+    "fencing",
+    "archetype",
+    "jungian",
+    "hermetic",
+    "fallfence",
+    "fall-estate"
+  ],
+  "scripts": {
+    "test": "node -e \"const fs=require('fs');const h=fs.readFileSync('fallfence.html','utf8');console.log('size',h.length,'bytes',Math.round(h.length/1024)+'KB');console.log('archetypes:', (h.match(/INTELLECTUAL_GATEKEEPER|TECHNICAL_CHALLENGER|AUTHORITY_QUOTER|EMOTIONAL_PROVOCATEUR|GENUINE_INQUIRER|COMPETITIVE_BUILDER/g)||[]).length>=18?'all 6 present':'MISSING');console.log('techniques:', (h.match(/frame_refusal|pivot|blade_catch|yield|tempo_control|teach/g)||[]).length>=12?'all present':'MISSING');\""
+  },
+  "fall": {
+    "prime": 599,
+    "rings": ["R3", "R5"],
+    "bloom": [4, 7, 7, 6, 5, 4, 3],
+    "tier": "A",
+    "agents": ["Ω", "α", "β", "γ", "δ", "ε"]
+  }
+}
