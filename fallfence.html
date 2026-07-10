@@ -546,8 +546,7 @@
 const FALLFENCE = {
   PRIME: 599,
   VERSION: '1.0.0',
-  CHANNEL: null,
-};
+  CHANNEL: null};
 
 /* ------------------------------------------------------------
    ε · kill-shot detector
@@ -557,8 +556,7 @@ const KILL_SHOTS = [
   { pattern: /\b(k|kk|ok)\b\s*\.?\s*$/i, msg: 'One-letter "k". They\'ve exited the frame. Don\'t chase.' },
   { pattern: /\bdon'?t\s*care\b/i, msg: 'Stated disengagement. Honour it. Silence is the reply.' },
   { pattern: /^(lol|lmao)\s*\.?\s*$/i, msg: 'Pure dismissal. No content to fence. Walk.' },
-  { pattern: /\bblocked?\b|\bgoodbye\b/i, msg: 'They\'ve signalled exit. The exchange is over.' },
-];
+  { pattern: /\bblocked?\b|\bgoodbye\b/i, msg: 'They\'ve signalled exit. The exchange is over.' }];
 
 function killShotCheck(text) {
   const t = (text || '').trim();
@@ -586,13 +584,11 @@ const ARCHETYPES = {
       /\b(common sense|by definition)\b/i,
       /\b(move(s|d|ing)? the goalposts?|goalpost(s)?)\b/i,
       /\byou enjoy\b.+\?/i,
-      /\bdo you\b.+\?/i,
-    ],
+      /\bdo you\b.+\?/i],
     field: 'Universal Law',
     fieldWhy: 'step under the categorical frame they\'re defending',
     technique: 'frame_refusal',
-    techWhy: 'present option C — refuse the A-or-B they set up',
-  },
+    techWhy: 'present option C — refuse the A-or-B they set up'},
   TECHNICAL_CHALLENGER: {
     label: 'Technical Challenger',
     cues: [
@@ -600,42 +596,36 @@ const ARCHETYPES = {
       /\b(indexeddb|localstorage|cors|csp|cache|cookie|cookies)\b/i,
       /(implementation|edge case|race condition|memory leak|breaking change)/i,
       /\b(but what about|won'?t (work|scale)|will break|race condition)\b/i,
-      /\b(quotas?|throttl|rate.?limit|polyfill)\b/i,
-    ],
+      /\b(quotas?|throttl|rate.?limit|polyfill)\b/i],
     field: 'Hermetic 7',
     fieldWhy: 'correspondence — yield the small, hold the principle',
     technique: 'yield',
-    techWhy: 'absorb the genuine technical point cleanly, then reframe scope',
-  },
+    techWhy: 'absorb the genuine technical point cleanly, then reframe scope'},
   AUTHORITY_QUOTER: {
     label: 'Authority Quoter',
     cues: [
       /\b(jung|freud|nietzsche|wittgenstein|hegel|plato|aristotle|kant)\b/i,
       /\b(study|studies|research|paper|peer.?review|meta.?analysis)\b.{0,40}(shows?|says?|found|demonstrates?)/i,
       /\b(harvard|stanford|mit|oxford|cambridge|nature|science)\b/i,
-      /(quote|said|wrote|argued|stated)[:,]?\s*[""']/i,
-      /\bcit(ed|ation|e)\b/i,
-    ],
+      /(quote|said|wrote|argued|stated)[:]?\s*[""']/i,
+      /\bcit(ed|ation|e)\b/i],
     field: 'Jungian depth',
     fieldWhy: 'meet the archetypal role they\'re invoking, not just the citation',
     technique: 'blade_catch',
-    techWhy: 'use their authority\'s words against the position they applied it to',
-  },
+    techWhy: 'use their authority\'s words against the position they applied it to'},
   EMOTIONAL_PROVOCATEUR: {
     label: 'Emotional Provocateur',
     cues: [
       /\b(pathetic|stupid|idiot|moron|clueless|delusional|cope|cringe)\b/i,
       /\b(seethe|mad|triggered|salty|mid|copium)\b/i,
-      /\?{2,}|!{2,}/,
+      /\?{2}|!{2}/,
       /\b(lmao|lol|kek)\b/i,
       /\b(you (people|types|sound|seem))\b/i,
-      /^(wow|imagine|oh)\b/i,
-    ],
+      /^(wow|imagine|oh)\b/i],
     field: 'Jungian depth',
     fieldWhy: 'shadow projection — don\'t mirror, name the dynamic or pivot',
     technique: 'tempo_control',
-    techWhy: 'pause &middot; do not match heat &middot; the silence itself reframes',
-  },
+    techWhy: 'pause &middot; do not match heat &middot; the silence itself reframes'},
   GENUINE_INQUIRER: {
     label: 'Genuine Inquirer',
     cues: [
@@ -643,13 +633,11 @@ const ARCHETYPES = {
       /(curious|wondering|trying to understand|help me understand|interested in)/i,
       /\?\s*$/,
       /\b(thanks|appreciate|grateful|please)\b/i,
-      /\b(would love to|want to learn|new to this)\b/i,
-    ],
+      /\b(would love to|want to learn|new to this)\b/i],
     field: 'Universal Law',
     fieldWhy: 'teach from the principle &middot; first cause, not just answer',
     technique: 'teach',
-    techWhy: 'this isn\'t a fence &middot; be generous &middot; give them the real thing',
-  },
+    techWhy: 'this isn\'t a fence &middot; be generous &middot; give them the real thing'},
   COMPETITIVE_BUILDER: {
     label: 'Competitive Builder',
     cues: [
@@ -657,14 +645,11 @@ const ARCHETYPES = {
       /\bmy (version|implementation|approach|tool|product|app)\b/i,
       /\b(we|i) (use|run|have|launched)\b.{0,30}(in production|at scale|for years)/i,
       /\b(been doing this|did this back in)\b/i,
-      /\b(my company|my startup|my team)\b/i,
-    ],
+      /\b(my company|my startup|my team)\b/i],
     field: 'Hermetic 7',
     fieldWhy: 'polarity — your work and theirs are not opposed, they\'re degrees',
     technique: 'pivot',
-    techWhy: 'acknowledge cleanly + show yours without comparing &middot; no contest',
-  },
-};
+    techWhy: 'acknowledge cleanly + show yours without comparing &middot; no contest'}};
 
 function detectArchetype(text) {
   const t = (text || '').toLowerCase();
@@ -703,8 +688,7 @@ const TECHNIQUES = {
   blade_catch:   { label: 'Blade Catch', short: 'their authority, your argument', long: 'Use their own citation or quote against the position they applied it to. The authority becomes yours.' },
   yield:         { label: 'Yield', short: 'absorb the real point cleanly', long: 'When the point is genuine, take it. Reframe scope. Yielding is not losing — it preserves your authority for the next move.' },
   tempo_control: { label: 'Tempo Control', short: '"I have several answers" &middot; pause before strike', long: 'Slow the exchange. Signal you have more than one reply. The pause itself shifts power.' },
-  teach:         { label: 'Teach (not fence)', short: 'genuine question → generous answer', long: 'Not every exchange is a fight. Recognise curiosity. Give the real answer, in plain words.' },
-};
+  teach:         { label: 'Teach (not fence)', short: 'genuine question → generous answer', long: 'Not every exchange is a fight. Recognise curiosity. Give the real answer, in plain words.' }};
 
 /* Matrix · 6 archetypes × 5 techniques · fit codes:
    prime, good, meh, no
@@ -715,8 +699,7 @@ const MATRIX = {
   AUTHORITY_QUOTER:        { frame_refusal:'good',  pivot:'meh',   blade_catch:'prime', yield:'meh',  tempo_control:'good' },
   EMOTIONAL_PROVOCATEUR:   { frame_refusal:'meh',   pivot:'good',  blade_catch:'no',    yield:'no',   tempo_control:'prime'},
   GENUINE_INQUIRER:        { frame_refusal:'no',    pivot:'meh',   blade_catch:'no',    yield:'good', tempo_control:'meh'  },
-  COMPETITIVE_BUILDER:     { frame_refusal:'meh',   pivot:'prime', blade_catch:'meh',   yield:'good', tempo_control:'good' },
-};
+  COMPETITIVE_BUILDER:     { frame_refusal:'meh',   pivot:'prime', blade_catch:'meh',   yield:'good', tempo_control:'good' }};
 
 function renderMatrix() {
   const tbody = document.getElementById('matrix-body');
@@ -724,8 +707,7 @@ function renderMatrix() {
     prime: { sym: '&#9632;', cls: 'fit-prime' },
     good:  { sym: '&#9633;', cls: 'fit-good' },
     meh:   { sym: '&middot;', cls: 'fit-meh' },
-    no:    { sym: '&nbsp;',  cls: 'fit-no' },
-  };
+    no:    { sym: '&nbsp;',  cls: 'fit-no' }};
   const techs = ['frame_refusal','pivot','blade_catch','yield','tempo_control'];
   let html = '';
   for (const [k, def] of Object.entries(ARCHETYPES)) {
@@ -750,25 +732,21 @@ const WORKED_EXAMPLES = {
     technique: 'frame_refusal',
     optionA: 'Both stories are compression, not instruction manuals.',
     optionB: 'The framing assumes I have to pick one. I don\'t. Religion is a compression of meaning, evolution is a compression of mechanism, technology is a compression of leverage. They\'re three coordinates, not three contestants. Treating them as rivals is what produces the heat — and the heat is what stops the actual question landing.',
-    optionC: 'Fair — I haven\'t formally studied evolutionary biology. What I\'ve been working with is the meta-pattern. If you\'ve got a place I should start, I\'m listening.',
-  },
+    optionC: 'Fair — I haven\'t formally studied evolutionary biology. What I\'ve been working with is the meta-pattern. If you\'ve got a place I should start, I\'m listening.'},
   safari: {
     text: 'Safari aggressively clears IndexedDB after 7 days of inactivity. Local-first sounds great until users lose all their data.',
     archetype: 'TECHNICAL_CHALLENGER',
     technique: 'yield',
     optionA: 'True. Mitigation: weekly export prompt + cloud-mirror opt-in.',
     optionB: 'Fair callout. Safari ITP clears IndexedDB after 7 days no-interaction. The sovereign answer isn\'t "pretend it doesn\'t happen" — it\'s a weekly JSON export nudge, an optional encrypted backup endpoint (the user\'s choice, not mine), and a re-import path that\'s one click. Sovereignty without resilience is just fragility with better marketing.',
-    optionC: 'Yeah — the choice isn\'t that wonderful if the data evaporates. Export-or-die nudge baked in. Cloud sync as opt-in, never default.',
-  },
+    optionC: 'Yeah — the choice isn\'t that wonderful if the data evaporates. Export-or-die nudge baked in. Cloud sync as opt-in, never default.'},
   goalposts: {
     text: 'You enjoy when someone moves the goalposts, do you?',
     archetype: 'INTELLECTUAL_GATEKEEPER',
     technique: 'tempo_control',
     optionA: 'I\'ve just learnt to pivot.',
     optionB: 'I have a few answers to that. The short one is: I\'ve learnt to pivot. The longer one is that goalpost-moving is a tell — it means the first frame failed and now we\'re negotiating a real one. That\'s not a bug of the exchange, that\'s the exchange. The actual question is whether you want the new frame or the original.',
-    optionC: 'Honest answer: the goalpost moving is the signal the frame is wrong. Don\'t need to enjoy it to honour it.',
-  },
-};
+    optionC: 'Honest answer: the goalpost moving is the signal the frame is wrong. Don\'t need to enjoy it to honour it.'}};
 
 function isWorkedExample(text) {
   const t = (text || '').toLowerCase();
@@ -787,8 +765,7 @@ function draftResponses(text, arche, technique, context) {
     return {
       A: { body: we.optionA, predict: 'they soften or escalate; either way, the frame is yours', words: we.optionA.split(/\s+/).length, kind: 'short' },
       B: { body: we.optionB, predict: 'they engage substantively with the new frame', words: we.optionB.split(/\s+/).length, kind: 'medium' },
-      C: { body: we.optionC, predict: 'they shift to dialogue mode — the yield disarms', words: we.optionC.split(/\s+/).length, kind: 'yield' },
-    };
+      C: { body: we.optionC, predict: 'they shift to dialogue mode — the yield disarms', words: we.optionC.split(/\s+/).length, kind: 'yield' }};
   }
 
   // Pull a quoted fragment for blade_catch
@@ -802,36 +779,29 @@ function draftResponses(text, arche, technique, context) {
     frame_refusal: {
       A: 'The framing assumes a choice that isn\'t actually there.',
       B: `That sets it up as A-or-B. There\'s a third option you haven\'t named: ${firstClause ? 'the axis you\'re measuring on is the thing we should be discussing, not the points along it.' : 'the frame itself is the thing under question, not the positions inside it.'} Once that\'s on the table, the original choice dissolves.`,
-      C: 'Genuine question — are we debating the position, or the frame the position sits in? Different conversations.',
-    },
+      C: 'Genuine question — are we debating the position, or the frame the position sits in? Different conversations.'},
     pivot: {
       A: 'Different angle: what would change for you if that turned out to be true?',
       B: `Taking that at face value — let\'s redirect. The interesting question underneath is not whether ${firstClause ? 'the surface claim holds' : 'this position is right'}, but what it would cost you to be wrong about it. That\'s the conversation worth having.`,
-      C: 'Fair point — and the thing I want to redirect to is the cost-of-being-wrong calculation, not the claim itself.',
-    },
+      C: 'Fair point — and the thing I want to redirect to is the cost-of-being-wrong calculation, not the claim itself.'},
     blade_catch: {
       A: quoted ? `Your own "${quoted}" makes the opposite case.` : 'The authority you\'re citing actually argued the opposite.',
       B: quoted
         ? `You quoted "${quoted}" — read in full, that passage makes the argument I\'m making, not the one you applied it to. Happy to point at the surrounding text if useful.`
         : `The authority you\'re reaching for argued the opposite of the position you\'re using them for. I\'ll surface the receipts if it would move the conversation forward.`,
-      C: 'Fair invocation — and if we read the full passage, I think it actually supports the frame I started with.',
-    },
+      C: 'Fair invocation — and if we read the full passage, I think it actually supports the frame I started with.'},
     yield: {
       A: 'You\'re right. Mitigation:',
       B: `Genuine point — taking it. Where I\'d reframe the scope: the failure mode you named is real, and the fix is ${context === 'linkedin' ? 'design discipline + a fallback path' : 'a fallback path + the user\'s explicit choice'}, not abandoning the original commitment. The principle survives the patch.`,
-      C: 'Taking the L on that specific point. The wider position still holds — and is better for the correction.',
-    },
+      C: 'Taking the L on that specific point. The wider position still holds — and is better for the correction.'},
     tempo_control: {
       A: 'I have several answers. Pick one.',
       B: `I have a few replies to that — the short one, the long one, and the honest one. Which mode do you want? Because the answer changes shape depending on whether we\'re fencing or building.`,
-      C: 'Pausing on that. Want to come back to it once the underlying question is named.',
-    },
+      C: 'Pausing on that. Want to come back to it once the underlying question is named.'},
     teach: {
       A: 'Short version: ' + firstClause.slice(0,60),
       B: `Real answer — ${firstClause}. The thing most miss is that the principle and the implementation aren\'t the same conversation. Happy to go deeper on either.`,
-      C: 'Best place I\'d send you to start is the original source, not the secondhand explanations. Want me to point at one?',
-    },
-  };
+      C: 'Best place I\'d send you to start is the original source, not the secondhand explanations. Want me to point at one?'}};
 
   const t = templates[technique] || templates.tempo_control;
   const predictions = {
@@ -840,15 +810,13 @@ function draftResponses(text, arche, technique, context) {
     blade_catch: ['they retreat from the citation','they double-down (now they\'re defending the source, not the point)','they shift authority — proves the catch worked'],
     yield: ['the temperature drops','they soften because you didn\'t fight','they over-extend and you reframe next move'],
     tempo_control: ['they fill the silence (revealing more)','they get impatient (their move, not yours)','they ask what you mean (now you set the frame)'],
-    teach: ['real exchange begins','they ask a follow-up','they go off and read'],
-  };
+    teach: ['real exchange begins','they ask a follow-up','they go off and read']};
   const preds = predictions[technique] || predictions.tempo_control;
 
   return {
     A: { body: t.A, predict: preds[0], words: t.A.split(/\s+/).length, kind: 'short' },
     B: { body: t.B, predict: preds[1], words: t.B.split(/\s+/).length, kind: 'medium' },
-    C: { body: t.C, predict: preds[2], words: t.C.split(/\s+/).length, kind: technique === 'yield' ? 'yield' : 'alt' },
-  };
+    C: { body: t.C, predict: preds[2], words: t.C.split(/\s+/).length, kind: technique === 'yield' ? 'yield' : 'alt' }};
 }
 
 /* ------------------------------------------------------------
@@ -1002,8 +970,7 @@ const STRATAGEMS = [
   ['35','Appeal to self-interest','Make them defend against personal cost.'],
   ['36','Bewilder with words','Use technical language to obscure.'],
   ['37','One bad argument disproves all','Use any weak proof to discredit the whole position.'],
-  ['38','Become personal','When losing, attack the person.'],
-];
+  ['38','Become personal','When losing, attack the person.']];
 
 function renderStratagems() {
   const out = document.getElementById('strat-grid');
@@ -1083,8 +1050,7 @@ function recordExchange(opponent, reply, arche, technique, context, chosen) {
     archeConf: arche?.confidence || 0,
     technique: TECHNIQUES[technique]?.label || technique,
     techKey: technique,
-    context, chosen,
-  };
+    context, chosen};
   logExchange(entry);
   // broadcast
   if (FALLFENCE.CHANNEL) {
@@ -1153,8 +1119,7 @@ function toast(msg) {
 const SAMPLE_TEXT = {
   religion: WORKED_EXAMPLES.religion.text,
   safari: WORKED_EXAMPLES.safari.text,
-  goalposts: WORKED_EXAMPLES.goalposts.text,
-};
+  goalposts: WORKED_EXAMPLES.goalposts.text};
 
 function wireSamples() {
   document.querySelectorAll('button.sample').forEach(b => {
@@ -1177,8 +1142,7 @@ const KONOMI = {
   async verify() {
     // Sovereign tier: no key needed; if a konomi.key shows up later, mint chain.
     return { ok: true, tier: 'sovereign', product: 'fallfence', prime: 599 };
-  },
-};
+  }};
 window.KONOMI = KONOMI;
 
 /* ------------------------------------------------------------
@@ -1226,8 +1190,7 @@ function wireLogControls() {
     const list = await getAllExchanges();
     const blob = new Blob([JSON.stringify({
       version: FALLFENCE.VERSION, prime: 599, exported: new Date().toISOString(),
-      exchanges: list,
-    }, null, 2)], { type: 'application/json' });
+      exchanges: list}, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url; a.download = `fallfence-log-${Date.now()}.json`;
