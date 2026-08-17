@@ -23,7 +23,7 @@
     "fall-estate"
   ],
   "scripts": {
-    "test": "node -e \"const fs=require('fs');const h=fs.readFileSync('fallfence.html','utf8');console.log('size',h.length,'bytes',Math.round(h.length/1024)+'KB');console.log('archetypes:', (h.match(/INTELLECTUAL_GATEKEEPER|TECHNICAL_CHALLENGER|AUTHORITY_QUOTER|EMOTIONAL_PROVOCATEUR|GENUINE_INQUIRER|COMPETITIVE_BUILDER/g)||[]).length>=18?'all 6 present':'MISSING');console.log('techniques:', (h.match(/frame_refusal|pivot|blade_catch|yield|tempo_control|teach/g)||[]).length>=12?'all present':'MISSING');\""
+    "test": "node test.mjs"
   },
   "fall": {
     "prime": 599,
